@@ -1,0 +1,211 @@
+(*Declaring the 3 types of trees. Each tree will have a left and right leaf. Left is used if the number is smaller, Right if larger*)
+datatype binode =
+                 Empty |
+                 Node of int  * binode * binode;
+datatype binode2 =
+                 Empty2 |
+                 Node2 of int * binode * binode2 * binode2;
+datatype binode3 =
+                 Empty3 |
+                 Node3 of int * binode2 * binode3 * binode3;
+
+
+(*Basic Add command to add nodes to tree. AddNode is called first and deals with binodes3, then binodes2 delt with in AddNode3, then binode is added in AddNode2*)
+fun AddNode2(a:int, Node(j, left, right)) = 
+		if (a < j andalso left = Empty) then Node(j, Node(a, Empty, Empty), right) 
+		else if (a < j andalso left <> Empty) then Node(j, AddNode2(a, left), right)
+		else if (a > j andalso right = Empty) then Node(j, left, Node(a, Empty, Empty)) 
+		else if (a > j andalso right <> Empty) then Node(j, left, AddNode2(a, right))
+		else Node(j, left, right);	
+fun AddNode3(a:int, b:int, Node2(j, straight, left, right)) = 
+		if (a = j) then Node2(j, AddNode2(b, straight), left, right) 
+		else if (a < j andalso left = Empty2) then Node2(j, straight, Node2(a, Node(b, Empty, Empty), Empty2, Empty2), right) 
+		else if (a < j andalso left <> Empty2) then Node2(j, straight, AddNode3(a, b, left), right)
+		else if (a > j andalso right = Empty2) then Node2(j, straight, left, Node2(a, Node(b, Empty, Empty), Empty2, Empty2)) 
+		else if (a > j andalso right <> Empty2) then Node2(j, straight, left, AddNode3(a, b, right))
+		else Node2(j, Empty, Empty2, Empty2);
+fun AddNode (a:int, b:int, c:int, Empty3) = Node3(a, Node2(b, Node(c, Empty, Empty), Empty2, Empty2), Empty3, Empty3) | 
+	AddNode(a:int, b:int, c:int, Node3(j, straight, left, right)) = 
+		if (a = j) then Node3(j, AddNode3(b, c, straight), left, right) 
+		else if (a < j andalso left = Empty3) then Node3(j, straight, Node3(a, Node2(b, Node(c, Empty, Empty), Empty2, Empty2), Empty3, Empty3), right)
+		else if (a < j andalso left <> Empty3) then Node3(j, straight, AddNode(a, b, c, left), right)
+		else if (a > j andalso right = Empty3) then Node3(j, straight, left, Node3(a, Node2(b, Node(c, Empty, Empty), Empty2, Empty2), Empty3, Empty3))
+		else if (a > j andalso right <> Empty3) then Node3(j, straight, left, AddNode(a, b, c, right))
+		else Node3(j, Empty2, Empty3, Empty3);
+
+		
+		
+		
+fun displayPath3(a:int, b:int, c:int, Empty) =  (print("(" ^ Int.toString b ^ ", " ^ Int.toString c ^ ", " ^ Int.toString a ^ ") NOT FOUND \n")) |	
+    displayPath3(a:int, b:int, c:int, Node(j, left, right)) =
+	if (a > j andalso right <> Empty) then (print("(" ^ Int.toString b ^ ", " ^ Int.toString c ^ ", " ^ Int.toString j ^ ")\n"); displayPath3(a, b, c, right))
+	else if (a < j andalso right <> Empty) then (print("(" ^ Int.toString b ^ ", " ^ Int.toString c ^ ", " ^ Int.toString j ^ ")\n"); displayPath3(a, b, c, right))
+	else if (a = j) then (print("(" ^ Int.toString b ^ ", " ^ Int.toString c ^ ", " ^ Int.toString j ^ ")FOUND\n")) 
+	else (print("(" ^ Int.toString b ^ ", " ^ Int.toString c ^ ", " ^ Int.toString a ^ ") NOT FOUND \n"));			
+fun displayPath2(a:int, b:int, c:int, Empty2) =  (print("(" ^ Int.toString c ^ " " ^ Int.toString a ^ ", " ^ Int.toString b ^ ") NOT FOUND \n")) |	
+    displayPath2(a:int, b:int, c:int, Node2(j, straight, left, right)) =
+	if (a > j andalso right <> Empty2) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString j ^  ")\n"); displayPath2(a, b, c, right))
+	else if (a < j andalso left <> Empty2) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString j ^  ")\n"); displayPath2(a, b, c, left))
+	else if (a = j) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString j ^  ")\n"); displayPath3(b, c, a, straight)) 
+	else (print("(" ^ Int.toString c ^ ", " ^ Int.toString a ^ ", " ^ Int.toString b ^ ") NOT FOUND \n"));
+fun displayPath(a:int, b:int, c:int, Empty3) =  (print("(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", " ^ Int.toString c ^ ") NOT FOUND \n")) |				
+    displayPath(a:int, b:int, c:int, Node3(j, straight, left, right)) =
+	if (a > j andalso right <> Empty3) then (print("(" ^ Int.toString j ^ ")\n"); displayPath(a, b, c, right)) 
+	else if (a < j andalso left <> Empty3) then (print("(" ^ Int.toString j ^ ")\n"); displayPath(a, b, c, left)) 
+	else if (a = j) then (print("(" ^ Int.toString j ^ ")\n"); displayPath2(b, c, a, straight))
+	else (print("(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", " ^ Int.toString c ^ ") NOT FOUND \n"));
+
+	
+	
+(*Adds a node to the tree regularly, but satisfies requirents as if user was requesting this addition*)
+fun AddNewNode2(a:int, b:int, c:int, Node(j, left, right)) =
+        if(a = j) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString b ^ ", "  ^ Int.toString a ^ ")Already Exists\n"); Node(j, left, right))
+		else if (a < j andalso left = Empty) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString b ^ ", "  ^ Int.toString a ^ ")Created\n");Node(j, Node(a, Empty, Empty), right)) 
+		else if (a < j andalso left <> Empty) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString b ^ ", " ^ Int.toString j ^ ")\n");Node(j, AddNewNode2(a, b, c, left), right))
+		else if (a > j andalso right = Empty) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString b ^ ", "  ^ Int.toString a ^ ")Created\n");Node(j, left, Node(a, Empty, Empty)) )
+		else if (a > j andalso right <> Empty) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString b ^ ", " ^ Int.toString j ^ ")\n");Node(j, left, AddNewNode2(a, b, c, right)))
+		else Node(j, Empty, Empty);
+fun AddNewNode3(a:int, b:int, c:int, Node2(j, straight, left, right)) = 
+		if (a = j) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString j ^ ") \n"); Node2(j, AddNewNode2(b, a, c, straight), left, right)) 
+		else if (a < j andalso left = Empty2) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString a ^ ")Created\n" ^ "(" ^ Int.toString c ^ ", " ^ Int.toString a ^ ", "  ^ Int.toString b ^ ")Created\n");Node2(j, straight, Node2(a, Node(b, Empty, Empty), Empty2, Empty2), right))
+		else if (a < j andalso left <> Empty2) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString j ^ ")\n");Node2(j, straight, AddNewNode3(a, b, c, left), right))
+		else if (a > j andalso right = Empty2) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString a ^ ")Created\n" ^ "(" ^ Int.toString c ^ ", " ^ Int.toString a ^ ", "  ^ Int.toString b ^ ")Created\n"); Node2(j, straight, left, Node2(a, Node(b, Empty, Empty), Empty2, Empty2))) 
+		else if (a > j andalso right <> Empty2) then (print("(" ^ Int.toString c ^ ", " ^ Int.toString j ^ ")\n");Node2(j, straight, left, AddNewNode3(a, b, c, right)))
+		else Node2(j, Empty, Empty2, Empty2);
+fun AddNewNode (a:int, b:int, c:int, Empty3) = Node3(a, Node2(b, Node(c, Empty, Empty), Empty2, Empty2), Empty3, Empty3) | 
+	AddNewNode(a:int, b:int, c:int, Node3(j, straight, left, right)) = 
+		if (a = j) then (print("(" ^ Int.toString j ^ ") \n"); Node3(j, AddNewNode3(b, c, a, straight), left, right))
+		else if (a < j andalso left = Empty3) then (print("(" ^ Int.toString a ^ ")Created\n" ^ "(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ")Created\n" ^ "(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", "  ^ Int.toString c ^ ")Created\n"); (Node3(j, straight, Node3(a, Node2(b, Node(c, Empty, Empty), Empty2, Empty2), Empty3, Empty3), right)))
+		else if (a < j andalso left <> Empty3) then (print("(" ^ Int.toString j ^ ")\n"); Node3(j, straight, AddNewNode(a, b, c, left), right))
+		else if (a > j andalso right = Empty3) then (print("(" ^ Int.toString a ^ ")Created\n" ^ "(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ")Created\n" ^ "(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", "  ^ Int.toString c ^ ")Created\n"); Node3(j, straight, left, Node3(a, Node2(b, Node(c, Empty, Empty), Empty2, Empty2), Empty3, Empty3)))
+		else if (a > j andalso right <> Empty3) then (print("(" ^ Int.toString j ^ ")\n"); Node3(j, straight, left, AddNewNode(a, b, c, right)))
+		else Node3(j, Empty2, Empty3, Empty3);
+	
+	
+	
+(*Prints the full tree*)
+fun PrintTree3 (j, k, Empty) = () | 
+    PrintTree3(j, k, Node(l, left, right)) =
+        if (left = Empty andalso right = Empty) then print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n")
+        else if (left <> Empty andalso right = Empty) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left))
+        else if (left = Empty andalso right <> Empty) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, right))
+        else if (left <> Empty andalso right <> Empty) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left); PrintTree3(j, k, right))
+        else print("error")
+fun PrintTree2 (j, Empty2) = () | 
+    PrintTree2(j, Node2(k, Node(l, left3, right3), left, right)) =
+        if (left = Empty2 andalso right = Empty2) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left3);PrintTree3(j, k, right3))
+        else if (left <> Empty2 andalso right = Empty2) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left3);PrintTree3(j, k, right3);PrintTree2(j ,left))
+        else if (left = Empty2 andalso right <> Empty2) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left3);PrintTree3(j, k, right3);PrintTree2(j, right))
+        else if (left <> Empty2 andalso right <> Empty2) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left3);PrintTree3(j, k, right3);PrintTree2(j ,left); PrintTree2(j, right))
+        else print("error")
+fun PrintTree Empty3 = () | 
+    PrintTree(Node3(j, Node2(k, Node(l, left3, right3), left2, right2), left, right)) =
+        if (left = Empty3 andalso right = Empty3) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left3);PrintTree3(j, k, right3);PrintTree2(j, left2);PrintTree2(j, right2))
+        else if (left <> Empty3 andalso right = Empty3) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left3);PrintTree3(j, k, right3);PrintTree2(j, left2);PrintTree2(j, right2);PrintTree left)
+        else if (left = Empty3 andalso right <> Empty3) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left3);PrintTree3(j, k, right3);PrintTree2(j, left2);PrintTree2(j, right2);PrintTree right)
+        else if (left <> Empty3 andalso right <> Empty3) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")\n");PrintTree3(j, k, left3);PrintTree3(j, k, right3);PrintTree2(j, left2);PrintTree2(j, right2);PrintTree left; PrintTree right)
+        else print("error")
+ 
+ 
+ 
+(*Given the top branch and the second branch, the third branch will be deleted*)
+fun DeleteNode2 (j, k, Empty) = () | 
+    DeleteNode2(j, k, Node(l, left, right)) =
+        if (left = Empty andalso right = Empty) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")Deleted\n"))
+        else if (left <> Empty andalso right = Empty) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")Deleted\n");DeleteNode2(j, k, left))
+        else if (left = Empty andalso right <> Empty) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")Deleted\n");DeleteNode2(j, k, right))
+        else if (left <> Empty andalso right <> Empty) then (print("(" ^ Int.toString j ^ ", " ^ Int.toString k ^ ", " ^ Int.toString l ^ ")Deleted\n");DeleteNode2(j, k, left); DeleteNode2(j, k, right))
+        else print("error")	
+fun DeleteNode3(a:int, b:int, Node2(j, straight, left, right)) = 
+		if (b = j) then  (DeleteNode2(a, b, straight); print("(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", 0) Created \n"); Node2(j, Node(0, Empty, Empty), left, right))
+		else if (b < j andalso left = Empty2) then (print("(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", _"  ^ ") Does Note Exist\n");Node2(j, straight, left, right))
+		else if (b < j andalso left <> Empty2) then Node2(j, straight, DeleteNode3(a, b, left), right)
+		else if (b > j andalso right = Empty2) then (print("(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", _"  ^ ") Does Note Exist\n");Node2(j, straight, left, right))
+		else if (b > j andalso right <> Empty2) then Node2(j, straight, left, DeleteNode3(a, b, right))
+		else Node2(j, Empty, Empty2, Empty2);
+fun DeleteNode(a:int, b:int, Node3(j, straight, left, right)) = 
+		if (a = j) then (Node3(j, DeleteNode3(a, b, straight), left, right))
+		else if (a < j andalso left = Empty3) then (print("(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", _"  ^ ") Does Note Exist\n");Node3(j, straight, left, right))
+		else if (a < j andalso left <> Empty3) then  (Node3(j, straight, DeleteNode(a, b, left), right))
+		else if (a > j andalso right = Empty3) then (print("(" ^ Int.toString a ^ ", " ^ Int.toString b ^ ", _"  ^ ") Does Note Exist\n");Node3(j, straight, left, right))
+		else if (a > j andalso right <> Empty3) then  (Node3(j, straight, left, DeleteNode(a, b, right)))
+		else Node3(j, Empty2, Empty3, Empty3);
+
+		
+		
+		
+(*Code for randomization*)
+val seed=let
+  val m=Date.minute(Date.fromTimeLocal(Time.now()))
+  val s=Date.second(Date.fromTimeLocal(Time.now()))
+  in Random.rand(m,s)
+end;
+Control.Print.printLength:=50;
+fun getRandInt(n)=Random.randRange(0,n) seed;
+
+
+
+(*Adds 10 random nodes to tree*)
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, Empty3);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+val x : binode3 = AddNode(a, b, c, x);
+val a : int = getRandInt(25);
+val b : int = getRandInt(25);
+val c : int = getRandInt(25);
+
+
+
+PrintTree(x);
+val x : binode3 = AddNewNode(25, 7, 3, x);
+displayPath(25, 7, 3, x);
+displayPath(25, 8, 3, x);
+val x : binode3 = DeleteNode(25, 7, x);
+
+
+
+
+
+
+
+
+
+
+
+
